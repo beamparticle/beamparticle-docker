@@ -1,4 +1,4 @@
-FROM linuxkit/alpine:daed76b8f1d28cdeeee215a95b9671c682a405dc AS mirror
+FROM linuxkit/alpine:8a89682421abf0d886d777235a05f4a04a736df2
 
 ENV OTP_VERSION="21.0.3"
 
@@ -11,6 +11,8 @@ RUN set -xe \
     && curl -fSL -o otp-src.tar.gz "$OTP_DOWNLOAD_URL" \
     && echo "$OTP_DOWNLOAD_SHA256  otp-src.tar.gz" | sha256sum -c - \
     && apk add --no-cache --virtual .build-deps \
+        alpine-baselayout \
+        apk-tools \
         dpkg-dev dpkg \
         gcc \
         g++ \
@@ -20,8 +22,6 @@ RUN set -xe \
         autoconf \
         ncurses-dev \
         openssl-dev \
-        unixodbc-dev \
-        lksctp-tools-dev \
         tar \
     && export ERL_TOP="/usr/src/otp_src_${OTP_VERSION%%@*}" \
     && mkdir -vp $ERL_TOP \
@@ -45,7 +45,7 @@ RUN set -xe \
             | sort -u \
             | awk 'system("[ -e /usr/local/lib/" $1 " ]") == 0 { next } { print "so:" $1 }' \
     )" \
-    && apk add --virtual .erlang-rundeps $runDeps lksctp-tools \
+    && apk add --virtual .erlang-rundeps $runDeps \
     && apk del .fetch-deps .build-deps
 
 RUN git clone https://github.com/beamparticle/beamparticle \
